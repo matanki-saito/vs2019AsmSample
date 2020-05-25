@@ -7,3 +7,5 @@ project ("vs2019AsmSample")
 
 # サブプロジェクトを含めます。
 add_subdirectory ("sample1")
+add_subdirectory ("sample2")
+add_subdirectory ("sample3")
