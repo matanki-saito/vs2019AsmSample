@@ -19,6 +19,7 @@ void hijack() {
     std::fstream fs(maps, std::ios::in);
     PatternSearch ps{"original"};
     while (std::getline(fs, line)) {
+        printf("%s\n",line.c_str());
         if (line.find(name) != std::string::npos) {
             int prot = PROT_READ;
             unsigned long long start, end;
