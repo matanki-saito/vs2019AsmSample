@@ -19,8 +19,10 @@ void hijack() {
     std::fstream fs(maps, std::ios::in);
     PatternSearch ps{"original"};
     while (std::getline(fs, line)) {
-        printf("%s\n",line.c_str());
+        
         if (line.find(name) != std::string::npos) {
+            printf("%s\n", line.c_str());
+
             int prot = PROT_READ;
             unsigned long long start, end;
             std::vector<ptr_t> ptr;
@@ -32,14 +34,17 @@ void hijack() {
             if (line[2 * ADDRLEN + 4] == 'x')
                 prot |= PROT_EXEC;
             if (not(prot & PROT_WRITE)) {
-                mprotect((void *)start, end - start, prot | PROT_WRITE);
+                if (mprotect((void*)start, end - start, prot | PROT_WRITE)) {
+                    exit(errno);
+                }
             }
             for (auto &n : ptr) {
+                printf("%ld\n",n);
                 std::memcpy((void *)n, "hooooook", 8);
             }
-            if (not(prot & PROT_WRITE)) {
-                mprotect((void *)start, end - start, prot);
-            }
+//            if (not(prot & PROT_WRITE)) {
+//                mprotect((void *)start, end - start, prot);
+//            }
         }
     }
 }

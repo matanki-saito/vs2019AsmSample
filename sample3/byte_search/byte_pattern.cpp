@@ -70,7 +70,7 @@ BytePattern& BytePattern::setModule(){
 	readlink("/proc/self/exe", prgPath, sizeof(prgPath));
 	sprintf(prgName, "%s", basename(prgPath));
 	
-	return setModule(prgName);
+	return setModule("target_program");
 }
 
 BytePattern& BytePattern::setModule(string moduleName){
@@ -96,8 +96,9 @@ void BytePattern::getModuleRanges(string moduleName){
 
 	std::string line;
 	while (std::getline(fs, line)) {
-		printf("%s\n", line.c_str());
 		if (line.find(moduleName) != std::string::npos) {
+			printf("%s\n", line.c_str());
+
 			pair<uintptr_t, uintptr_t> range;
 
 			int prot = PROT_READ;
@@ -110,9 +111,10 @@ void BytePattern::getModuleRanges(string moduleName){
 			if (line[2 * ADDRLEN + 4] == 'x')
 				prot |= PROT_EXEC;
 			if (not(prot & PROT_WRITE)) {
-				mprotect((void*)start, end - start, prot | PROT_WRITE);
+				if (mprotect((void*)range.first, range.second - range.first, prot | PROT_WRITE)) {
+					exit(errno);
+				}
 			}
-
 
 			this->_ranges.emplace_back(range);
 		}
@@ -257,4 +259,16 @@ void BytePattern::bm_search()
 			}
 		}
 	}
+}
+
+memory_pointer BytePattern::get(size_t index) const {
+	return this->_results.at(index);
+}
+
+memory_pointer BytePattern::get_first() const{
+	return this->get(0);
+}
+
+memory_pointer BytePattern::get_second() const{
+	return this->get(1);
 }

@@ -11,12 +11,14 @@
 #include <boost/algorithm/string.hpp>
 
 class memory_pointer{
-	union{
+
+
+public:
+	union {
 		void* Pointer;
 		std::uintptr_t Address;
 	};
 
-public:
 	memory_pointer() :Pointer{}{}
 	memory_pointer(void* p) : Pointer(p){}
 	memory_pointer(std::uintptr_t i): Address(i){}
@@ -29,8 +31,16 @@ public:
 		return reinterpret_cast<T*>(this->address(offset));
 	}
 
+	template<class T> T* get() const {
+		return (T*)this->address();
+	}
+
 	operator std::uintptr_t() const{
 		return this->address();
+	}
+
+	template<class T> operator T* () const {
+		return reinterpret_cast<T*>(this->Pointer);
 	}
 };
 
@@ -92,4 +102,9 @@ public:
 
 	// util
 	std::size_t count() const;
+
+	// get
+	memory_pointer get(std::size_t index) const;
+	memory_pointer get_first() const;
+	memory_pointer get_second() const;
 };
